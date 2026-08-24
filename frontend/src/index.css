@@ -1,0 +1,243 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --border: #e2e2df;
+  --text: #1f1f1d;
+  --text-muted: #6b6b66;
+  --accent: #0f6e56;
+  --accent-text: #ffffff;
+  --danger: #b3261e;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1, h2 {
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+h1 {
+  font-size: 20px;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 4px 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+button {
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button[type="submit"] {
+  width: 100%;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  font-weight: 600;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 0;
+  font-weight: 600;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 13px;
+  margin: -4px 0 12px;
+}
+
+.empty-text, .muted-text {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Halaman login */
+.page-center {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem;
+}
+
+.switch-mode {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 1rem 0 0;
+}
+
+/* Layout utama setelah login */
+.app-shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.app-title {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Upload & daftar dataset */
+.upload-zone {
+  display: block;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.upload-zone:hover {
+  border-color: var(--accent);
+}
+
+.dataset-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--border);
+}
+
+.dataset-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dataset-name {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.dataset-name:not(:disabled):hover {
+  color: var(--accent);
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-uploaded { background: #eee; color: #55554f; }
+.status-processing { background: #fdecc8; color: #8a5a00; }
+.status-done { background: #dcf1e6; color: #0f6e56; }
+.status-failed { background: #fbe0de; color: #b3261e; }
+
+.analyze-button {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+/* Insight dashboard */
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 1rem;
+}
+
+.insight-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.insight-card p {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+.category-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.category-korelasi { background: #dbe9fb; color: #0c447c; }
+.category-outlier { background: #fdecc8; color: #8a5a00; }
+.category-missing_data { background: #fbe0de; color: #b3261e; }
+.category-perbandingan_grup { background: #eeedfe; color: #3c3489; }
