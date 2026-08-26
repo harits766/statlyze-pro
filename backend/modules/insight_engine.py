@@ -71,6 +71,71 @@ def insights_from_missing(profiling: dict, threshold: float = 20.0) -> list[Insi
     return insights
 
 
+def insights_from_association(results: list[dict]) -> list[Insight]:
+    """Dari uji Chi-square + Cramer's V antar kolom kategorikal."""
+    insights = []
+    for r in results:
+        if r["p_value"] is None or r["p_value"] >= 0.05:
+            continue
+        v = r.get("cramers_v") or 0.0
+        if v < 0.2:
+            continue  # asosiasi terlalu lemah buat dianggap menarik
+        strength = "kuat" if v >= 0.5 else "moderat"
+        text = (
+            f"Asosiasi {strength} antara '{r['var_x']}' dan '{r['var_y']}' "
+            f"(Cramer's V={v:.2f}, p={r['p_value']:.3f})."
+        )
+        insights.append(Insight(text=text, priority=v, category="asosiasi_kategorikal"))
+    return insights
+
+
+def insights_from_regression(result: dict) -> list[Insight]:
+    """Dari hasil linear_regression atau logistic_regression di modules/regression.py."""
+    if not result.get("method"):
+        return []
+    sig_predictors = [name for name, info in result["coefficients"].items() if info["significant"]]
+    if not sig_predictors:
+        return []
+
+    if result["method"] == "linear_regression":
+        text = (
+            f"'{result['target']}' berhubungan signifikan dengan {', '.join(sig_predictors)} "
+            f"lewat regresi linear (R²={result['r_squared']:.2f})."
+        )
+        priority = result["r_squared"]
+    else:
+        text = (
+            f"'{result['target']}' berhubungan signifikan dengan {', '.join(sig_predictors)} "
+            f"lewat regresi logistik (pseudo-R²={result['pseudo_r_squared']:.2f})."
+        )
+        priority = result["pseudo_r_squared"]
+
+    return [Insight(text=text, priority=priority, category="regresi")]
+
+
+def insights_from_clustering(result: dict) -> list[Insight]:
+    """Dari hasil hierarchical_clustering di modules/clustering.py."""
+    if not result.get("method") or result.get("silhouette_score", -1) < 0.25:
+        return []  # silhouette rendah = pemisahan cluster nggak cukup meyakinkan
+    cols_preview = ", ".join(result["columns"][:3])
+    text = (
+        f"Data terbagi jadi {result['n_clusters']} kelompok alami berdasarkan "
+        f"{cols_preview} (silhouette score={result['silhouette_score']:.2f})."
+    )
+    return [Insight(text=text, priority=result["silhouette_score"], category="clustering")]
+
+
+def insights_from_pca(result: dict) -> list[Insight]:
+    """Dari hasil pca_analysis di modules/multivariate.py."""
+    if not result.get("method"):
+        return []
+    text = (
+        f"{result['n_components']} komponen utama sudah menjelaskan "
+        f"{result['cumulative_variance_pct']:.0f}% variasi dari {len(result['columns'])} variabel numerik."
+    )
+    return [Insight(text=text, priority=result["cumulative_variance_pct"] / 100, category="multivariat")]
+
+
 def rank_insights(all_insights: list[Insight], top_n: int | None = None) -> list[Insight]:
     ranked = sorted(all_insights, key=lambda i: i.priority, reverse=True)
     return ranked[:top_n] if top_n else ranked

@@ -4,6 +4,8 @@ Load .env duluan sebelum modul lain (security.py) baca environment
 variable-nya -- makanya load_dotenv() ada di paling atas, sebelum
 import lain.
 """
+import os  # noqa: E402
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -33,11 +35,19 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS: browser nge-block request lintas origin secara default. Frontend
-# React (localhost:5173) dan backend ini (localhost:8000) dianggap origin
-# beda, jadi harus diizinin manual di sini.
+# dan backend dianggap origin beda kalau alamatnya beda, jadi harus
+# diizinin manual di sini.
+#
+# Default-nya alamat dev lokal (Vite). Pas deploy ke hosting, tambahin
+# alamat production frontend-nya lewat environment variable ALLOWED_ORIGINS
+# (dipisah koma) -- TIDAK PERLU ubah kode ini lagi. Contoh:
+#   ALLOWED_ORIGINS=https://statlyze.up.railway.app,https://statlyze.com
+_default_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_extra_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_default_origins + _extra_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

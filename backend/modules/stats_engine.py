@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from itertools import combinations
 
+import numpy as np
 import pandas as pd
 from scipy import stats
 
@@ -95,3 +96,65 @@ def compare_groups(df: pd.DataFrame, numeric_col: str, group_col: str, alpha: fl
         "numeric_col": numeric_col,
         "group_col": group_col,
     }
+
+
+def association_categorical(x: pd.Series, y: pd.Series) -> dict:
+    """Uji asosiasi 2 variabel kategorikal: Chi-square (signifikansi) + Cramer's V
+    (kekuatan asosiasi, 0-1, biar bisa dibandingin sama korelasi numerik).
+    """
+    paired = pd.concat([x, y], axis=1).dropna()
+    if len(paired) < 5:
+        return {"method": None}
+    table = pd.crosstab(paired.iloc[:, 0], paired.iloc[:, 1])
+    if table.shape[0] < 2 or table.shape[1] < 2:
+        return {"method": None}
+    chi2, p, _, _ = stats.chi2_contingency(table)
+    n = table.to_numpy().sum()
+    min_dim = min(table.shape) - 1
+    cramers_v = float((chi2 / (n * min_dim)) ** 0.5) if min_dim > 0 else None
+    return {
+        "method": "chi_square",
+        "chi2": float(chi2),
+        "p_value": float(p),
+        "cramers_v": cramers_v,
+        "n": int(n),
+    }
+
+
+def association_matrix(df: pd.DataFrame, categorical_cols: list[str]) -> list[dict]:
+    """Uji asosiasi untuk semua pasangan kolom kategorikal."""
+    results = []
+    for col_x, col_y in combinations(categorical_cols, 2):
+        res = association_categorical(df[col_x], df[col_y])
+        if res["method"] is not None:
+            res.update({"var_x": col_x, "var_y": col_y})
+            results.append(res)
+    return results
+
+
+def compute_vif(df: pd.DataFrame, numeric_cols: list[str]) -> dict[str, float]:
+    """Variance Inflation Factor tiap kolom numerik -- indikator multikolinearitas.
+
+    Dihitung manual dari R^2 regresi kolom itu terhadap kolom numerik lainnya
+    (VIF = 1 / (1 - R^2)), pakai numpy least-squares -- nggak butuh statsmodels
+    cuma buat ini. VIF > 5 biasanya dianggap tanda multikolinearitas tinggi.
+    """
+    clean = df[numeric_cols].dropna()
+    if len(numeric_cols) < 2 or len(clean) < len(numeric_cols) + 2:
+        return {}
+    vif = {}
+    for col in numeric_cols:
+        others = [c for c in numeric_cols if c != col]
+        X = clean[others].to_numpy()
+        y = clean[col].to_numpy()
+        X_design = np.column_stack([np.ones(len(X)), X])
+        try:
+            coef, *_ = np.linalg.lstsq(X_design, y, rcond=None)
+        except np.linalg.LinAlgError:
+            continue
+        y_pred = X_design @ coef
+        ss_res = float(np.sum((y - y_pred) ** 2))
+        ss_tot = float(np.sum((y - y.mean()) ** 2))
+        r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
+        vif[col] = float("inf") if r2 >= 0.999 else float(1 / (1 - r2))
+    return vif
