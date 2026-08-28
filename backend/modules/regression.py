@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
 
 
 def linear_regression(df: pd.DataFrame, target: str, predictors: list[str]) -> dict:
     """OLS: target dan semua predictors harus numerik."""
+    import statsmodels.api as sm  # lazy import -- statsmodels berat, cuma di-load pas beneran dipakai
+
     data = df[[target] + predictors].dropna()
     if len(data) < len(predictors) + 5:
         return {"method": None}
@@ -44,6 +45,8 @@ def linear_regression(df: pd.DataFrame, target: str, predictors: list[str]) -> d
 
 def logistic_regression(df: pd.DataFrame, target: str, predictors: list[str]) -> dict:
     """Regresi logistik biner: target harus kategorikal dengan tepat 2 kelas."""
+    import statsmodels.api as sm  # lazy import -- sama alasannya kayak di linear_regression
+
     data = df[[target] + predictors].dropna()
     if len(data) < len(predictors) + 10:
         return {"method": None}

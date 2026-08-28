@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from scipy.cluster.hierarchy import fcluster, linkage
-from scipy.spatial.distance import pdist, squareform
 
 MAX_ROWS_FOR_CLUSTERING = 2000  # jaga performa -- silhouette itu O(n^2)
 
@@ -43,6 +41,9 @@ def _silhouette_score(dist_matrix: np.ndarray, labels: np.ndarray) -> float:
 
 
 def hierarchical_clustering(df: pd.DataFrame, columns: list[str], max_k: int = 6) -> dict:
+    from scipy.cluster.hierarchy import fcluster, linkage  # lazy import, jaga memory startup
+    from scipy.spatial.distance import pdist, squareform
+
     data = df[columns].dropna()
     if len(data) < 10:
         return {"method": None}
