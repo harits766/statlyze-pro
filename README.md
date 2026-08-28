@@ -1,8 +1,8 @@
 # 📊 Statlyze
 
-**Analisis statistik otomatis untuk data tabular**
+**Analisis statistik otomatis untuk data tabular — murni matematika, nol dependensi AI/LLM.**
 
-Upload CSV/Excel, dan Statlyze otomatis melakukan EDA, memilih uji statistik yang tepat (parametrik vs non-parametrik, tergantung distribusi data), merekomendasikan analisis lanjutan yang relevan (regresi, clustering, atau PCA), lalu menerjemahkan semuanya jadi insight berbahasa natural — semua dihitung lokal pakai `scipy`, `numpy`, dan `statsmodels`.
+Upload CSV/Excel, dan Statlyze otomatis melakukan EDA, memilih uji statistik yang tepat (parametrik vs non-parametrik, tergantung distribusi data), merekomendasikan analisis lanjutan yang relevan (regresi, clustering, atau PCA), lalu menerjemahkan semuanya jadi insight berbahasa natural — semua dihitung lokal pakai `scipy`, `numpy`, dan `statsmodels`, **tanpa memanggil API AI/LLM sama sekali**.
 
 🔗 **[Coba langsung](https://successful-manifestation-production-236a.up.railway.app)** · 📖 **[API Docs](https://statlyze-pro-production.up.railway.app/docs)**
 
@@ -38,12 +38,11 @@ Banyak tool sejenis nembak dataset ke LLM dan minta dia "kasih insight". Statlyz
 - Insight diranking berdasarkan signifikansi & kekuatan efek, ditampilkan berbahasa natural
 
 ## 🧠 Cara kerja
-EDA 2. Rekomendasi 3. Analisis lanjutan 4. Insight
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ Profiling, │ → │ Baca karakteristik│ → │ Regresi, │ → │ Interpretasi │
-│ korelasi, deteksi│ │ data, pilih │ │ clustering, │ │ otomatis + │
-│ pola │ │ analisis relevan │ │ atau PCA │ │ angka pendukung │
-└─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘
+
+1. **EDA** — Profiling, korelasi, deteksi pola
+2. **Rekomendasi** — Baca karakteristik data, pilih analisis yang relevan
+3. **Analisis lanjutan** — Regresi, clustering, atau PCA (sesuai rekomendasi)
+4. **Insight** — Interpretasi otomatis + angka pendukung
 
 Tahap 2 murni rule-based (if/else atas hasil tahap 1) — bukan model ML, jadi tiap rekomendasi bisa dijelaskan alasannya (misal: *"income dan spending berkorelasi kuat (r=0.95) → rekomendasi regresi linear"*).
 
@@ -58,23 +57,21 @@ Tahap 2 murni rule-based (if/else atas hasil tahap 1) — bukan model ML, jadi t
 
 ## 📁 Struktur project
 
-statlyze-pro/
-├── backend/
-│ ├── app/ # FastAPI: auth, endpoint dataset, security, rate limiting
-│ ├── modules/ # Statistical engine
-│ │ ├── data_loader.py # Load & deteksi tipe kolom
-│ │ ├── profiling.py # Descriptive stats & outlier
-│ │ ├── stats_engine.py # Korelasi, uji beda rata-rata, asosiasi kategorikal, VIF
-│ │ ├── recommender.py # Rule-based recommender analisis lanjutan
-│ │ ├── regression.py # Regresi linear & logistik (statsmodels)
-│ │ ├── clustering.py # Hierarchical clustering + silhouette score
-│ │ ├── multivariate.py # PCA
-│ │ └── insight_engine.py # Terjemahin hasil statistik jadi kalimat + ranking
-│ ├── requirements.txt
-│ └── Dockerfile
-└── frontend/ # React + Vite
-└── Dockerfile
-
+- **`backend/`**
+  - `app/` — FastAPI: auth, endpoint dataset, security, rate limiting
+  - `modules/` — Statistical engine
+    - `data_loader.py` — Load & deteksi tipe kolom
+    - `profiling.py` — Descriptive stats & outlier
+    - `stats_engine.py` — Korelasi, uji beda rata-rata, asosiasi kategorikal, VIF
+    - `recommender.py` — Rule-based recommender analisis lanjutan
+    - `regression.py` — Regresi linear & logistik (statsmodels)
+    - `clustering.py` — Hierarchical clustering + silhouette score
+    - `multivariate.py` — PCA
+    - `insight_engine.py` — Terjemahin hasil statistik jadi kalimat + ranking
+  - `requirements.txt`
+  - `Dockerfile`
+- **`frontend/`** — React + Vite
+  - `Dockerfile`
 
 ## 🚀 Menjalankan secara lokal
 
