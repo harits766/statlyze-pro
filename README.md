@@ -29,6 +29,14 @@ py -m uvicorn app.main:app --reload --port 8001
 ```
 Buka http://127.0.0.1:8001/docs — harus muncul Swagger UI.
 
+**Kalau database-nya udah pernah dipakai sebelum fitur username ada**, jalanin
+migrasi ini sekali (aman diulang, otomatis skip kalau udah pernah):
+```
+python -m app.migrate_add_username
+```
+User lama otomatis dikasih username dari bagian depan email-nya
+(budi@mail.com -> `budi`).
+
 ### 2. Frontend
 ```
 cd frontend
@@ -43,6 +51,15 @@ udah mati (gejala umum kalau server distop paksa/Ctrl+C tanpa nunggu cleanup).
 Pindah ke 8001 itu jalan pintas paling aman ketimbang ngebersihin port lama.
 Kalau mau balik ke 8000 nanti, tinggal ganti `--port 8001` jadi `--port 8000`
 DAN ganti isi `frontend/.env` (`VITE_API_URL`) biar tetap nyambung.
+
+## Akun & login
+- Daftar butuh **username + email + password**. Username unik, 3-20 karakter,
+  diawali huruf, isinya huruf/angka/underscore.
+- Login boleh pakai **email ATAU username** — dua-duanya nggak case-sensitive
+  karena disimpan huruf kecil semua.
+- Token JWT isinya ID user, jadi tetap valid walau nanti email/username diganti.
+- Percobaan register & login dibatasi 5x per menit per IP. Kalau lagi ngetes
+  berulang-ulang di lokal, set `RATE_LIMIT_ENABLED=0` di `.env`.
 
 ## Catatan penting
 - `app/main.py` pakai versi dari langkah security (CORS + rate limiter

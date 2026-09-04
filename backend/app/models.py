@@ -22,6 +22,11 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    # username & email sama-sama unik dan sama-sama bisa dipakai buat login.
+    # Keduanya disimpan dalam huruf kecil semua (dinormalisasi di schemas.py),
+    # jadi "Budi" dan "budi" dianggap user yang sama -- ini penting karena
+    # perbandingan string di SQLite/Postgres itu case-sensitive secara default.
+    username = Column(String(20), unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime, default=dt.datetime.utcnow)

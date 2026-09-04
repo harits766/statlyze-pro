@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 backend/.env
 backend/statlyze.db
+backend/statlyze.db.bak-*
 backend/storage/
 frontend/node_modules/
 frontend/dist/
