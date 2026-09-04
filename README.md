@@ -33,7 +33,8 @@ Banyak tool sejenis nembak dataset ke LLM dan minta dia "kasih insight". Statlyz
 - PCA (dekomposisi matriks kovarians manual pakai numpy) untuk meringkas variabel yang saling redundan
 
 **Aplikasi**
-- Auth JWT (register/login), rate limiting, validasi input
+- Auth JWT: register pakai username unik + email, login bisa pakai **email atau username**
+- Rate limiting (5 percobaan register/login per menit per IP), validasi input
 - Upload dataset, riwayat dataset per user
 - Insight diranking berdasarkan signifikansi & kekuatan efek, ditampilkan berbahasa natural
 
@@ -83,6 +84,7 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env      # isi SECRET_KEY (python -c "import secrets; print(secrets.token_hex(32))")
 python -m app.init_db
+python -m app.migrate_add_username   # cuma perlu kalau DB-nya udah ada sebelum fitur username
 uvicorn app.main:app --reload --port 8001
 ```
 
@@ -94,6 +96,15 @@ npm run dev
 ```
 
 Detail lebih lengkap (Docker, deploy ke Railway) ada di `backend/README.md`.
+
+## 🔐 Akun & login
+
+- Register butuh **username + email + password**. Username unik, 3–20 karakter, diawali huruf, isinya huruf/angka/underscore, dan sebagian kata dipesan sistem (`admin`, `login`, `api`, dll).
+- Login menerima **email atau username**. Keduanya disimpan huruf kecil semua, jadi tidak case-sensitive.
+- Token JWT berisi ID user (bukan email), sehingga tetap valid kalau nanti ada fitur ganti email/username.
+- Pesan login gagal disamakan untuk semua kasus dan hashing tetap dijalankan walau akun tidak ditemukan — supaya selisih waktu respons tidak membocorkan email/username mana yang terdaftar.
+
+Kolom `username` ditambahkan ke tabel yang sudah ada lewat `app/migrate_add_username.py` — `create_all()` hanya membuat tabel baru, tidak menambah kolom. Migrasi ini idempotent dan sudah dijalankan otomatis sebagai langkah `[2/3]` di `Dockerfile`, jadi deploy tidak perlu tindakan manual.
 
 ## 📖 API Reference
 

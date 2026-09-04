@@ -87,6 +87,14 @@ button[type="submit"] {
   margin: -4px 0 12px;
 }
 
+/* Keterangan kecil di bawah input, misal aturan format username */
+.field-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  margin: -10px 0 14px;
+}
+
 .empty-text, .muted-text {
   color: var(--text-muted);
   font-size: 14px;
@@ -134,6 +142,17 @@ button[type="submit"] {
 .app-title {
   font-weight: 700;
   font-size: 18px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.current-user {
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 /* Upload & daftar dataset */

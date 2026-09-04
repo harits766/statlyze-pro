@@ -20,24 +20,30 @@ async function handleResponse(res) {
     } catch {
       // response bukan JSON, biarin pesan default
     }
-    throw new Error(detail);
+    const error = new Error(detail);
+    // Status-nya dibawa ikut biar pemanggil bisa bedain "token kedaluwarsa"
+    // (401 -> suruh login lagi) dari error biasa.
+    error.status = res.status;
+    throw error;
   }
   return res.json();
 }
 
-export async function registerUser(email, password) {
+export async function registerUser(username, email, password) {
   const res = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, email, password }),
   });
   return handleResponse(res);
 }
 
-export async function loginUser(email, password) {
-  // endpoint /login pakai format form (bukan JSON), field "username" diisi email
+export async function loginUser(identifier, password) {
+  // endpoint /login pakai format form (bukan JSON). Field-nya bernama
+  // "username" karena ngikutin standar OAuth2 password flow, tapi isinya
+  // boleh email ATAU username -- backend nyocokin ke dua-duanya.
   const body = new URLSearchParams();
-  body.append("username", email);
+  body.append("username", identifier);
   body.append("password", password);
 
   const res = await fetch(`${API_URL}/login`, {
@@ -46,6 +52,13 @@ export async function loginUser(email, password) {
     body,
   });
   return handleResponse(res); // { access_token, token_type }
+}
+
+export async function getMe(token) {
+  const res = await fetch(`${API_URL}/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse(res); // { id, username, email, created_at }
 }
 
 export async function uploadDataset(token, file) {

@@ -28,11 +28,18 @@ def get_current_user(
     if payload is None:
         raise credentials_exception
 
-    email = payload.get("sub")
-    if email is None:
+    subject = payload.get("sub")
+    if not subject:
         raise credentials_exception
 
-    user = db.query(User).filter(User.email == email).first()
+    # Token baru isinya ID user (angka). Token lama -- yang dibikin sebelum
+    # login pakai username ada -- isinya email, jadi tetap dilayani biar user
+    # yang masih pegang token lama nggak tiba-tiba ke-logout.
+    if subject.isdigit():
+        user = db.query(User).filter(User.id == int(subject)).first()
+    else:
+        user = db.query(User).filter(User.email == subject.lower()).first()
+
     if user is None:
         raise credentials_exception
     return user
