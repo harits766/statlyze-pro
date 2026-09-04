@@ -22,8 +22,18 @@ COPY . .
 ENV PORT=8001
 EXPOSE 8001
 
-# Bikin tabel database dulu (aman dijalanin berkali-kali, cuma bikin
-# kalau belum ada), baru start server-nya. --host 0.0.0.0 WAJIB di
-# dalam container (bukan 127.0.0.1) biar bisa diakses dari luar container.
-# echo di antara dua perintah biar keliatan jelas transisi antar fase di log.
-CMD echo "=== [1/2] Init database ===" && python -m app.init_db && echo "=== [2/2] Starting Uvicorn di port ${PORT} ===" && uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --log-level debug
+# Urutan start-nya penting:
+#   [1] init_db     -> bikin tabel yang belum ada (database baru)
+#   [2] migrate     -> tambahin kolom yang belum ada di tabel LAMA
+#   [3] uvicorn     -> baru start server
+#
+# Langkah [2] nggak bisa digantiin [1]: create_all() cuma bikin tabel yang
+# belum ada, dia NGGAK nambahin kolom baru ke tabel yang udah terlanjur
+# jalan. Tanpa ini, database production yang tabel users-nya udah ada bakal
+# kehilangan kolom `username` dan SEMUA query auth balikin 500.
+# Dua-duanya aman dijalanin tiap kali container restart.
+#
+# --host 0.0.0.0 WAJIB di dalam container (bukan 127.0.0.1) biar bisa
+# diakses dari luar container. echo di antara tiap perintah biar keliatan
+# jelas transisi antar fase di log.
+CMD echo "=== [1/3] Init database ===" && python -m app.init_db && echo "=== [2/3] Migrasi kolom username ===" && python -m app.migrate_add_username && echo "=== [3/3] Starting Uvicorn di port ${PORT} ===" && uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --log-level debug
